@@ -203,6 +203,14 @@ class LIMEExplainer:
 
         return categorical_features
 
+    def _predict_proba_numpy(self, X):
+        """Ensure LIME always calls predict_proba with numpy arrays."""
+        if isinstance(X, pd.DataFrame):
+            X = X.values
+        elif not isinstance(X, np.ndarray):
+            X = np.array(X)
+        return self.model.predict_proba(X)
+
 
     def explain(self, X_test, instance_idx=0):
         """
@@ -212,12 +220,6 @@ class LIMEExplainer:
         :return: DataFrame of feature attributions for the explained instance
         """
 
-        def _predict_proba_numpy(self, X):
-            """Ensure LIME always calls predict_proba with numpy arrays."""
-            if isinstance(X, pd.DataFrame):
-                X = X.values
-            return self.model.predict_proba(X)
-
         if isinstance(X_test, pd.DataFrame):
             self.X_test = X_test.to_numpy()
         elif isinstance(X_test, np.ndarray):
@@ -226,7 +228,8 @@ class LIMEExplainer:
         X_test = pd.DataFrame(self.X_test, columns=self.features)
         x_instance = X_test.iloc[instance_idx:instance_idx+1]
         explanation = self.explainer.explain_instance(
-            X_test.iloc[instance_idx].values, self._predict_proba_numpy
+            X_test.iloc[instance_idx].values,
+            self._predict_proba_numpy
         )
         return self._map_binned_to_original(explanation.as_list(), x_instance)
 
