@@ -29,7 +29,6 @@ class SHAPExplainer:
         """
         self.model = model
         self.features_original = features
-        # self.features = features.str.replace(' ', '_')
         self.features = [feature.replace(' ', '_') for feature in features]
         self.task = task
         self.subset_samples = subset_samples
@@ -64,9 +63,6 @@ class SHAPExplainer:
                 return shap.TreeExplainer(self.model, X_train_sample)
             else:
                 return shap.TreeExplainer(self.model, X_train)
-        elif isinstance(self.model, torch.nn.Module): 
-            self.shap_type = "NN"
-            return shap.DeepExplainer(self.model, torch.tensor(X_train.values).float()) 
         elif hasattr(self.model, 'coef_') or isinstance(self.model, (LogisticRegression,LogisticRegressionCV,ElasticNet)):
             self.shap_type = "LRegression"
             return shap.LinearExplainer(self.model, X_train)

@@ -37,7 +37,7 @@ class ExplanationMetricsTabular:
         """
         self.model = model
         self.explainer_name = explainer_name.lower()
-        if self.explainer_name=="backtrace":
+        if self.explainer_name == "backtrace":
             self.method = method.lower()
         else:
             self.method = method
@@ -46,8 +46,6 @@ class ExplanationMetricsTabular:
             self.X_test = X_test.to_numpy()
         elif isinstance(X_test, np.ndarray):
             self.X_test = X_test
-        elif isinstance(X_test, torch.Tensor):
-            self.X_test = X_test.numpy()
         else:
             raise ValueError("X_test must be a DataFrame or ndarray.")
         
@@ -94,24 +92,8 @@ class ExplanationMetricsTabular:
             return SHAPExplainer(model=self.model, features=pd.Series(self.features), task=self.task, X_train=self.X_train,subset_samples=self.subset_samples,subset_number=self.subset_number)
         elif self.explainer_name == 'lime':
             return LIMEExplainer(model=self.model, features=self.features, task=explainer_mode, X_train=self.X_train)
-        elif self.explainer_name == 'torch':
-            # Ensure PyTorch model
-            if not isinstance(self.model, torch.nn.Module):
-                raise ValueError("For 'torch' explainer, model must be a PyTorch model.")
-            return TorchTabularExplainer(model=self.model, task=self.task, method=self.method, feature_names=self.features, X_train=self.X_train)
-        elif self.explainer_name == 'tensorflow':
-            # Ensure TensorFlow model
-            if not isinstance(self.model, tf.keras.Model):
-                raise ValueError("For 'tensorflow' explainer, model must be a TensorFlow/Keras model.")
-            return TFTabularExplainer(model=self.model, task=self.task, method=self.method, feature_names=self.features, X_train=self.X_train)
-        elif self.explainer_name == 'backtrace':
-            # Backtrace works with TF/PyTorch
-            if not (isinstance(self.model, tf.keras.Model) or isinstance(self.model, torch.nn.Module)):
-                raise ValueError("For 'backtrace' explainer, model must be a TF/Keras or PyTorch model.")
-            return DlBacktraceTabularExplainer(model=self.model, task=self.task, method=self.method, scaler=self.scaler,
-                                      thresholding=self.thresholding, feature_names=self.features)
         else:
-            raise ValueError("Unsupported explainer name. Choose from 'shap', 'lime', 'torch', 'tensorflow', 'backtrace'.")
+            raise ValueError("Unsupported explainer name. Choose from 'shap', 'lime'.")
 
     def _predict_proba_sklearn(self, X):
         """
