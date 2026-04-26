@@ -6,15 +6,7 @@ import numpy as np
 from xai_evals.explainer import LIMEExplainer, SHAPExplainer
 from sklearn.base import is_regressor, is_classifier
 from tqdm import tqdm
-# import torch
-# import quantus
-# import tensorflow as tf
-# from tf_explain.core import IntegratedGradients, VanillaGradients, GradCAM, SmoothGrad, OcclusionSensitivity
-# from tensorflow.keras.utils import to_categorical
-# import numpy
-# from dl_backtrace.tf_backtrace import Backtrace as TFBacktrace
-# from dl_backtrace.pytorch_backtrace import Backtrace as TorchBacktrace
-# from xai_evals.utils import backtrace_quantus
+
 
 class ExplanationMetricsTabular:
     def __init__(self, 
