@@ -22,3 +22,5 @@ _templates
 
 # package version file
 version.py
+
+.idea/

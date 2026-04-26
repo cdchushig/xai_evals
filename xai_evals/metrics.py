@@ -1,19 +1,17 @@
 import os
 import gc
 import pickle
-import torch
-import quantus
 import pandas as pd
 import numpy as np
-import tensorflow as tf
 from xai_evals.explainer import LIMEExplainer, SHAPExplainer
 from sklearn.base import is_regressor, is_classifier
-import tensorflow as tf
-from tf_explain.core import IntegratedGradients, VanillaGradients, GradCAM, SmoothGrad, OcclusionSensitivity
-from tensorflow.keras.utils import to_categorical
-import numpy
-import quantus
 from tqdm import tqdm
+# import torch
+# import quantus
+# import tensorflow as tf
+# from tf_explain.core import IntegratedGradients, VanillaGradients, GradCAM, SmoothGrad, OcclusionSensitivity
+# from tensorflow.keras.utils import to_categorical
+# import numpy
 # from dl_backtrace.tf_backtrace import Backtrace as TFBacktrace
 # from dl_backtrace.pytorch_backtrace import Backtrace as TorchBacktrace
 # from xai_evals.utils import backtrace_quantus
