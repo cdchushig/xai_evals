@@ -58,11 +58,20 @@ class SHAPExplainer:
             raise ValueError("Model does have predict probability hence it not support SHAP explanation.")           
         elif isinstance(self.model, (HistGradientBoostingClassifier,LGBMClassifier, CatBoostClassifier,RandomForestClassifier, DecisionTreeClassifier, xgb.XGBClassifier, GradientBoostingClassifier, ExtraTreesClassifier)):
             #AdaBoostClassifier,BaggingClassifier not supported by treeshap
+
             self.shap_type = "Tree"
-            if self.subset_samples:
-                return shap.TreeExplainer(self.model, X_train_sample)
-            else:
-                return shap.TreeExplainer(self.model, X_train)
+
+            # if self.subset_samples:
+            #     return shap.TreeExplainer(self.model, X_train_sample)
+            # else:
+            #     return shap.TreeExplainer(self.model, X_train)
+
+            # AFTER
+            X_bg = X_train_sample if self.subset_samples else X_train
+            # Always pass numpy to TreeExplainer to avoid feature name warnings
+            X_bg_arr = X_bg.values if isinstance(X_bg, pd.DataFrame) else np.array(X_bg)
+            return shap.TreeExplainer(self.model, X_bg_arr)
+
         elif hasattr(self.model, 'coef_') or isinstance(self.model, (LogisticRegression,LogisticRegressionCV,ElasticNet)):
             self.shap_type = "LRegression"
             return shap.LinearExplainer(self.model, X_train)
@@ -70,11 +79,20 @@ class SHAPExplainer:
             self.shap_type = "NOA"
             return shap.KernelExplainer(self._model_predict, X_train)
 
+    # def _model_predict(self, X):
+    #     """Wrapper for model's prediction function to ensure compatibility with SHAP."""
+    #     if isinstance(X, np.ndarray):
+    #         X = pd.DataFrame(X, columns=self.features_original)
+    #     return self.model.predict_proba(X)
+
     def _model_predict(self, X):
         """Wrapper for model's prediction function to ensure compatibility with SHAP."""
-        if isinstance(X, np.ndarray):
-            X = pd.DataFrame(X, columns=self.features_original)
+        if isinstance(X, pd.DataFrame):
+            X = X.values  # always pass numpy to avoid feature name mismatch
+        elif not isinstance(X, np.ndarray):
+            X = np.array(X)
         return self.model.predict_proba(X)
+
 
     def explain(self, X_test, instance_idx=0):
         """
@@ -185,6 +203,7 @@ class LIMEExplainer:
 
         return categorical_features
 
+
     def explain(self, X_test, instance_idx=0):
         """
         Explain a specific instance using LIME.
@@ -192,6 +211,13 @@ class LIMEExplainer:
         :param instance_idx: Index of the instance to explain
         :return: DataFrame of feature attributions for the explained instance
         """
+
+        def _predict_proba_numpy(self, X):
+            """Ensure LIME always calls predict_proba with numpy arrays."""
+            if isinstance(X, pd.DataFrame):
+                X = X.values
+            return self.model.predict_proba(X)
+
         if isinstance(X_test, pd.DataFrame):
             self.X_test = X_test.to_numpy()
         elif isinstance(X_test, np.ndarray):
@@ -200,7 +226,7 @@ class LIMEExplainer:
         X_test = pd.DataFrame(self.X_test, columns=self.features)
         x_instance = X_test.iloc[instance_idx:instance_idx+1]
         explanation = self.explainer.explain_instance(
-            X_test.iloc[instance_idx].values, self.model.predict_proba
+            X_test.iloc[instance_idx].values, self._predict_proba_numpy
         )
         return self._map_binned_to_original(explanation.as_list(), x_instance)
 
