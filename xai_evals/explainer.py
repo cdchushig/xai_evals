@@ -29,7 +29,8 @@ class SHAPExplainer:
         """
         self.model = model
         self.features_original = features
-        self.features = features.str.replace(' ', '_')
+        # self.features = features.str.replace(' ', '_')
+        self.features = [feature.replace(' ', '_') for feature in features]
         self.task = task
         self.subset_samples = subset_samples
         self.subset_number = subset_number
